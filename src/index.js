@@ -39,7 +39,7 @@ function setup(webContents) {
       // Retrieve saved credentials
       let credentials = config.get('credentials');
       // Retrieve saved persistentId : avoid receiving all already received notifications on start
-      const persistentId = config.get('persistentId');
+      const persistentIds = config.get('persistentIds') || [];
       // Register if no credentials
       if (!credentials) {
         credentials = await register(senderId);
@@ -49,7 +49,7 @@ function setup(webContents) {
         webContents.send(TOKEN_UPDATED, credentials.fcm.token);
       }
       // Listen for GCM/FCM notifications
-      await listen(Object.assign({}, credentials, { persistentId }), onNotification);
+      await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
       // Notify the renderer process that we are listening for notifications
       webContents.send(NOTIFICATION_SERVICE_STARTED);
     } catch (e) {
@@ -62,9 +62,10 @@ function setup(webContents) {
 
 // Will be called on new notification
 function onNotification(webContents) {
-  return ({ notification, persistentId: newPersistentId }) => {
+  return ({ notification, persistentId }) => {
+    const persistentIds = config.get('persistentIds') || [];
     // Update persistentId
-    config.set('persistentId', newPersistentId);
+    config.set('persistentIds', [...persistentIds, persistentId]);
     // Notify the renderer process that a new notification has been received
     webContents.send(NOTIFICATION_RECEIVED, notification);
   };

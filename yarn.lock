@@ -1531,8 +1531,8 @@ punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
 
 push-receiver@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/push-receiver/-/push-receiver-1.0.0.tgz#a2ada7bcb5c2ec8ff27d03d78e59794e49cc0d3c"
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/push-receiver/-/push-receiver-1.0.1.tgz#6fe63d34870e184135ca20601680bad3b9b36222"
   dependencies:
     http_ece "^1.0.5"
     long "^3.2.0"
@@ -1727,8 +1727,8 @@ slice-ansi@1.0.0:
     is-fullwidth-code-point "^2.0.0"
 
 sntp@2.x.x:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/sntp/-/sntp-2.0.2.tgz#5064110f0af85f7cfdb7d6b67a40028ce52b4b2b"
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/sntp/-/sntp-2.1.0.tgz#2c6cec14fedc2222739caf9b5c3d85d1cc5a2cc8"
   dependencies:
     hoek "4.x.x"
 
