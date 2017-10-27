@@ -52,7 +52,7 @@ import {
 } from 'electron-push-receiver';
 
 // Listen for service successfully started
-ipcRenderer.on(NOTIFICATION_SERVICE_STARTED, () => // do something);
+ipcRenderer.on(NOTIFICATION_SERVICE_STARTED, (_, token) => // do something);
 // Handle notification errors
 ipcRenderer.on(NOTIFICATION_SERVICE_ERROR, (_, error) => // do something);
 // Send FCM token to backend

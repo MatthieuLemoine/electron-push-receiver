@@ -31,13 +31,14 @@ let started = false;
 function setup(webContents) {
   // Will be called by the renderer process
   ipcMain.on(START_NOTIFICATION_SERVICE, async (_, senderId) => {
+    // Retrieve saved credentials
+    let credentials = config.get('credentials');
     if (started) {
+      webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
       return;
     }
     started = true;
     try {
-      // Retrieve saved credentials
-      let credentials = config.get('credentials');
       // Retrieve saved persistentId : avoid receiving all already received notifications on start
       const persistentIds = config.get('persistentIds') || [];
       // Register if no credentials
@@ -51,7 +52,7 @@ function setup(webContents) {
       // Listen for GCM/FCM notifications
       await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
       // Notify the renderer process that we are listening for notifications
-      webContents.send(NOTIFICATION_SERVICE_STARTED);
+      webContents.send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
     } catch (e) {
       console.error('PUSH_RECEIVER:::Error while starting the service', e);
       // Forward error to the renderer process
