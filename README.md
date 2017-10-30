@@ -2,25 +2,9 @@
 
 A module to bring Web Push support to [Electron](https://github.com/electron/electron) allowing it to receive notifications from Firebase Cloud Messaging (FCM).
 
-## Why ?
+## Why and how ?
 
-[Electron](https://github.com/electron/electron) doesn't include the Web Push Service available in Chrome/Chromium that allows the browser to receive Web Push notifications from Firebase Cloud Messaging (FCM).
-
-The main reason is that electron is based on [Chromium Content](https://www.chromium.org/developers/content-module) using [libchromiumcontent](https://github.com/electron/libchromiumcontent) and not on the whole Chromium browser. [Chromium Content](https://www.chromium.org/developers/content-module) is the minimum part of Chromium needed to create an actual browser but whitout Google APis & services providing a smaller binary.
-
-You can read through https://github.com/electron/electron/issues/6697 for more context.
-
-The most used workaround is to use websocket to send notifications instead but then you to handle the case when the user is disconnected and store the notifications....
-
-But I didn't want that as I was already using FCM to send notifications to mobile apps (Android & iOS) and to web apps.
-
-I think that it's better to use the same great tool (FCM) for all platforms.
-
-## How ?
-
-`electron-push-receiver` is a convenient wrapper around [push-receiver](https://github.com/MatthieuLemoine/push-receiver) so that you don't have to handle registration & credentials storage.
-
-If you are interested in how, the real work is done in [push-receiver](https://github.com/MatthieuLemoine/push-receiver) that allows any node process (e.g Electron main process) to receive Web Push notifications from FCM.
+See [this blog post](https://medium.com/@MatthieuLemoine/my-journey-to-bring-web-push-support-to-node-and-electron-ce70eea1c0b0).
 
 ## Install
 
