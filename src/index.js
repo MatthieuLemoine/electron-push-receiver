@@ -29,6 +29,8 @@ function setup(webContents) {
   ipcMain.on(START_NOTIFICATION_SERVICE, async (_, senderId) => {
     // Retrieve saved credentials
     let credentials = config.get('credentials');
+    // Retrieve saved senderId
+    const savedSenderId = config.get('senderId');
     if (started) {
       webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
       return;
@@ -37,11 +39,13 @@ function setup(webContents) {
     try {
       // Retrieve saved persistentId : avoid receiving all already received notifications on start
       const persistentIds = config.get('persistentIds') || [];
-      // Register if no credentials
-      if (!credentials) {
+      // Register if no credentials or if senderId has changed
+      if (!credentials || savedSenderId !== senderId) {
         credentials = await register(senderId);
         // Save credentials for later use
         config.set('credentials', credentials);
+        // Save senderId
+        config.set('senderId', senderId);
         // Notify the renderer process that the FCM token has changed
         webContents.send(TOKEN_UPDATED, credentials.fcm.token);
       }
