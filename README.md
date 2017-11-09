@@ -33,7 +33,7 @@ import {
   NOTIFICATION_SERVICE_ERROR,
   NOTIFICATION_RECEIVED as ON_NOTIFICATION_RECEIVED,
   TOKEN_UPDATED,
-} from 'electron-push-receiver/constants';
+} from 'electron-push-receiver/src/constants';
 
 // Listen for service successfully started
 ipcRenderer.on(NOTIFICATION_SERVICE_STARTED, (_, token) => // do something);
