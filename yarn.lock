@@ -1531,8 +1531,8 @@ punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
 
 push-receiver@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/push-receiver/-/push-receiver-1.1.0.tgz#ae1e7a94b94b1b40d8755b67d8dcd9258835a702"
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/push-receiver/-/push-receiver-1.1.1.tgz#b77bb99c8e0cdd71399c99669d585649cf1b6830"
   dependencies:
     http_ece "^1.0.5"
     long "^3.2.0"
