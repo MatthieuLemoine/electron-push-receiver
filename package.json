@@ -21,6 +21,6 @@
     "prettier-eslint-cli": "^4.4.0"
   },
   "peerDepencies": {
-    "electron": "^1.8.1"
+    "electron": "^1.8.2"
   }
 }
