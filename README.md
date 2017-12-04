@@ -46,3 +46,7 @@ ipcRenderer.on(ON_NOTIFICATION_RECEIVED, (_, notification) => // display notific
 // Start service
 ipcRenderer.send(START_NOTIFICATION_SERVICE, senderId);
 ```
+
+## Example
+
+Thanks to [CydeSwype](https://github.com/CydeSwype), you can find an example project [here](https://github.com/CydeSwype/electron-fcm-demo).
