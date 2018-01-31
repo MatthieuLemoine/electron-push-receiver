@@ -21,10 +21,14 @@ module.exports = {
 };
 
 // To be sure that start is called only once
+let starting = false;
 let started = false;
+let webContentses = [];
 
 // To be call from the main process
 function setup(webContents) {
+  addWebConents(webContents)
+
   // Will be called by the renderer process
   ipcMain.on(START_NOTIFICATION_SERVICE, async (_, senderId) => {
     // Retrieve saved credentials
@@ -32,10 +36,15 @@ function setup(webContents) {
     // Retrieve saved senderId
     const savedSenderId = config.get('senderId');
     if (started) {
-      webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
+      if (!webContents.isDestroyed()) {
+        webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
+      }
       return;
     }
-    started = true;
+    if (starting) {
+      return
+    }
+    starting = true;
     try {
       // Retrieve saved persistentId : avoid receiving all already received notifications on start
       const persistentIds = config.get('persistentIds') || [];
@@ -46,28 +55,55 @@ function setup(webContents) {
         config.set('credentials', credentials);
         // Save senderId
         config.set('senderId', senderId);
-        // Notify the renderer process that the FCM token has changed
-        webContents.send(TOKEN_UPDATED, credentials.fcm.token);
+        // Notify the renderer processes that the FCM token has changed
+        send(TOKEN_UPDATED, credentials.fcm.token);
       }
       // Listen for GCM/FCM notifications
       await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
-      // Notify the renderer process that we are listening for notifications
-      webContents.send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
+      // Notify the renderer processes that we are listening for notifications
+      send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
+      started = true;
     } catch (e) {
       console.error('PUSH_RECEIVER:::Error while starting the service', e);
-      // Forward error to the renderer process
-      webContents.send(NOTIFICATION_SERVICE_ERROR, e.message);
+      // Forward error to the renderer processes
+      send(NOTIFICATION_SERVICE_ERROR, e.message);
+      starting = false;
+      started = false;
     }
   });
 }
 
+function addWebConents(webContents) {
+  webContentses.push(webContents)
+  webContents.on('destroyed', () => {
+    removeWebContents(webContents)
+  })
+}
+
+function removeWebContents(webContents) {
+  let i = webContentses.indexOf(webContents)
+  if (i > -1) {
+    webContentses.splice(i, 1)
+  }
+}
+
+function send(channel, arg1) {
+  webContentses.forEach((webContents) => {
+    if (webContents.isDestroyed()) {
+      // sending to a destroyed web contents crashes the process, so be safe
+      return
+    }
+    webContents.send(channel, arg1)
+  })
+}
+
 // Will be called on new notification
-function onNotification(webContents) {
+function onNotification() {
   return ({ notification, persistentId }) => {
     const persistentIds = config.get('persistentIds') || [];
     // Update persistentId
     config.set('persistentIds', [...persistentIds, persistentId]);
-    // Notify the renderer process that a new notification has been received
-    webContents.send(NOTIFICATION_RECEIVED, notification);
+    // Notify the renderer processes that a new notification has been received
+    send(NOTIFICATION_RECEIVED, notification);
   };
 }
