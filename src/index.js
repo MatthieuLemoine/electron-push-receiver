@@ -36,8 +36,10 @@ function setup(webContents) {
     // Retrieve saved senderId
     const savedSenderId = config.get('senderId');
     if (started) {
-      if (!webContents.isDestroyed()) {
+      try {
         webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
+      } catch (e) {
+        console.error('PUSH_RECEIVER:::Error while sending to webContents', e);
       }
       return;
     }
@@ -89,11 +91,11 @@ function removeWebContents(webContents) {
 
 function send(channel, arg1) {
   webContentses.forEach((webContents) => {
-    if (webContents.isDestroyed()) {
-      // sending to a destroyed web contents crashes the process, so be safe
-      return
+    try {
+      webContents.send(channel, arg1)
+    } catch (e) {
+      console.error('PUSH_RECEIVER:::Error while sending to webContents', e);
     }
-    webContents.send(channel, arg1)
   })
 }
 
