@@ -26,7 +26,7 @@ let started = false;
 let webContentses = [];
 
 // To be call from the main process
-function setup(webContents) {
+function setup(webContents, {throwErrors} = {}) {
   addWebConents(webContents)
 
   // Will be called by the renderer process
@@ -61,16 +61,26 @@ function setup(webContents) {
         send(TOKEN_UPDATED, credentials.fcm.token);
       }
       // Listen for GCM/FCM notifications
-      await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
+      let client = await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
+      client.on('parserError', (error) => {
+        console.error('PUSH_RECEIVER:::Error from parser', error);
+        send(NOTIFICATION_SERVICE_ERROR, error.message);
+        if (throwErrors) {
+          throw error
+        }
+      })
       // Notify the renderer processes that we are listening for notifications
       send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
       started = true;
-    } catch (e) {
-      console.error('PUSH_RECEIVER:::Error while starting the service', e);
+    } catch (error) {
+      console.error('PUSH_RECEIVER:::Error while starting the service', error);
       // Forward error to the renderer processes
-      send(NOTIFICATION_SERVICE_ERROR, e.message);
+      send(NOTIFICATION_SERVICE_ERROR, error.message);
       starting = false;
       started = false;
+      if (throwErrors) {
+        throw error
+      }
     }
   });
 }
