@@ -53,8 +53,10 @@ There are cases where you may need to reset the push receiver to a state where i
 One solution is to simply delete the cache and restart the app using Electron's API. But this is not always desirable. If you want to avoid clearing your app's cache and don't want to restart the app, you can call the reset method on the push receiver. This will have to be called from the renderer process back into the main prcoess. Here is an example of how to setup a callback in the main process:
 
 ```javascript
+var mPushReceiver;
+
 ipcRenderer.on('resetPushReceiver', (event, arg) => {
-    pushReceiver.reset();
+    mPushReceiver.reset();
 })
 ```
 Then in your renderer process:
@@ -68,7 +70,10 @@ If you don't plan on restarting your app, you will have to call the setupPushRec
 
 ```javascript
 ipcRenderer.on('startPushReceiver', (event, arg) => {
-    pushReceiver.setup(mMainWindow.webContents);
+    if (mPushReceiver ==  null) {
+        mPushReceiver = require('electron-push-receiver');
+        mPushReceiver.setup(mMainWindow.webContents);
+    }
 })
 ```
 
