@@ -18,6 +18,7 @@ module.exports = {
   NOTIFICATION_RECEIVED,
   TOKEN_UPDATED,
   setup,
+  reset,
 };
 
 // To be sure that start is called only once
@@ -60,7 +61,13 @@ function setup(webContents) {
     }
   });
 }
-
+// Called in the disconnect
+function reset() {
+  config.set('credentials', null);
+  config.set('senderId', null);
+  config.set('persistentIds', null);
+  started = false;
+}
 // Will be called on new notification
 function onNotification(webContents) {
   return ({ notification, persistentId }) => {
