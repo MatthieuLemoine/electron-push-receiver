@@ -18,7 +18,7 @@ module.exports = {
   NOTIFICATION_RECEIVED,
   TOKEN_UPDATED,
   setup,
-  reset
+  reset,
 };
 
 // To be sure that start is called only once
@@ -61,7 +61,7 @@ function setup(webContents) {
     }
   });
 }
-
+// Called in the disconnect
 function reset() {
   config.set('credentials', null);
   config.set('senderId', null);
