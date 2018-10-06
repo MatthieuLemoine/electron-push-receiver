@@ -3,7 +3,7 @@
   "env": {
     "browser": true,
     "node": true,
-    "es6": true,
+    "es6": true
   },
   "rules": {
     "import/no-extraneous-dependencies": 0,
