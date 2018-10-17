@@ -9,9 +9,9 @@ const {
   TOKEN_UPDATED,
 } = require('./constants');
 
-const config = new Config();
-
-const confPrefix = 'push-receiver-';
+const config = new Config({
+  name: 'electron-push-receiver'
+});
 
 module.exports = {
   START_NOTIFICATION_SERVICE,
@@ -30,9 +30,9 @@ function setup(webContents) {
   // Will be called by the renderer process
   ipcMain.on(START_NOTIFICATION_SERVICE, async (_, senderId) => {
     // Retrieve saved credentials
-    let credentials = config.get(confPrefix + 'credentials');
+    let credentials = config.get('credentials');
     // Retrieve saved senderId
-    const savedSenderId = config.get(confPrefix + 'senderId');
+    const savedSenderId = config.get('senderId');
     if (started) {
       webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
       return;
@@ -40,14 +40,14 @@ function setup(webContents) {
     started = true;
     try {
       // Retrieve saved persistentId : avoid receiving all already received notifications on start
-      const persistentIds = config.get(confPrefix + 'persistentIds') || [];
+      const persistentIds = config.get('persistentIds') || [];
       // Register if no credentials or if senderId has changed
       if (!credentials || savedSenderId !== senderId) {
         credentials = await register(senderId);
         // Save credentials for later use
-        config.set(confPrefix + 'credentials', credentials);
+        config.set('credentials', credentials);
         // Save senderId
-        config.set(confPrefix + 'senderId', senderId);
+        config.set('senderId', senderId);
         // Notify the renderer process that the FCM token has changed
         webContents.send(TOKEN_UPDATED, credentials.fcm.token);
       }
@@ -66,9 +66,9 @@ function setup(webContents) {
 // Will be called on new notification
 function onNotification(webContents) {
   return ({ notification, persistentId }) => {
-    const persistentIds = config.get(confPrefix + 'persistentIds') || [];
+    const persistentIds = config.get('persistentIds') || [];
     // Update persistentId
-    config.set(confPrefix + 'persistentIds', [...persistentIds, persistentId]);
+    config.set('persistentIds', [...persistentIds, persistentId]);
     // Notify the renderer process that a new notification has been received
     webContents.send(NOTIFICATION_RECEIVED, notification);
   };
