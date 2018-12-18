@@ -5,6 +5,7 @@ interface ElectronPushReceiver {
     NOTIFICATION_RECEIVED: string;
     TOKEN_UPDATED: string;
     setup: (webContents: Electron.WebContents) => void;
+    reset: () => void;
 }
 
 declare const electronPushReceiver: ElectronPushReceiver;
