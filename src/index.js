@@ -66,7 +66,7 @@ function onNotification(webContents) {
   return ({ notification, persistentId }) => {
     const persistentIds = store.get('persistentIds') || [];
     // Update persistentId
-    Store.set('persistentIds', [...persistentIds, persistentId]);
+    store.set('persistentIds', [...persistentIds, persistentId]);
     // Notify the renderer process that a new notification has been received
     webContents.send(NOTIFICATION_RECEIVED, notification);
   };
