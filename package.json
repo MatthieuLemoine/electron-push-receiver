@@ -8,7 +8,7 @@
   "license": "MIT",
   "types": "src/electron-push-receiver.d.ts",
   "dependencies": {
-    "electron-config": "^1.0.0",
+    "electron-store": "^2.0.0",
     "push-receiver": "^2.0.2"
   },
   "devDependencies": {
