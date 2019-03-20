@@ -21,10 +21,14 @@ module.exports = {
 };
 
 // To be sure that start is called only once
+let starting = false;
 let started = false;
+let webContentses = [];
+
 
 // To be call from the main process
-function setup(webContents) {
+function setup(webContents, {throwErrors} = {}) {
+  addWebContents(webContents);
   // Will be called by the renderer process
   ipcMain.on(START_NOTIFICATION_SERVICE, async (_, senderId) => {
     // Retrieve saved credentials
@@ -32,10 +36,17 @@ function setup(webContents) {
     // Retrieve saved senderId
     const savedSenderId = config.get('senderId');
     if (started) {
-      webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
+      try {
+        webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
+      } catch (e) {
+        console.error('PUSH_RECEIVER:::Error while sending to webContents', e);
+      }
       return;
     }
-    started = true;
+    if (starting) {
+      return
+    }
+    starting = true;
     try {
       // Retrieve saved persistentId : avoid receiving all already received notifications on start
       const persistentIds = config.get('persistentIds') || [];
@@ -47,27 +58,64 @@ function setup(webContents) {
         // Save senderId
         config.set('senderId', senderId);
         // Notify the renderer process that the FCM token has changed
-        webContents.send(TOKEN_UPDATED, credentials.fcm.token);
+        send(TOKEN_UPDATED, credentials.fcm.token);
       }
       // Listen for GCM/FCM notifications
-      await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
+      let cleint = await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
+      client.on('parserError', error => {
+        console.error('PUSH_RECEIVER:::Error from parser', error);
+        send(NOTIFICATION_SERVICE_ERROR, error.message);
+        if (throwErrors) {
+          throw error;
+        }
+      })
       // Notify the renderer process that we are listening for notifications
-      webContents.send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
+      send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
+      started = true;
     } catch (e) {
       console.error('PUSH_RECEIVER:::Error while starting the service', e);
       // Forward error to the renderer process
-      webContents.send(NOTIFICATION_SERVICE_ERROR, e.message);
+      send(NOTIFICATION_SERVICE_ERROR, e.message);
+      starting = false;
+      started = false;
+      if (throwErrors) {
+        throw error;
+      }
     }
   });
 }
 
+function addWebContents(webContents) {
+  webContentses.push(webContents)
+  webContents.on('destroyed', () => {
+    removeWebContents(webContents)
+  })
+}
+
+function removeWebContents(webContents) {
+  let i = webContentses.indexOf(webContents)
+  if (i > -1) {
+    webContentses.splice(i, 1)
+  }
+}
+
+function send(channel, arg1) {
+  webContentses.forEach((webContents) => {
+    try {
+      webContents.send(channel, arg1)
+    } catch (e) {
+      console.error('PUSH_RECEIVER:::Error while sending to webContents', e);
+    }
+  })
+}
+
 // Will be called on new notification
-function onNotification(webContents) {
+function onNotification() {
   return ({ notification, persistentId }) => {
     const persistentIds = config.get('persistentIds') || [];
     // Update persistentId
     config.set('persistentIds', [...persistentIds, persistentId]);
     // Notify the renderer process that a new notification has been received
-    webContents.send(NOTIFICATION_RECEIVED, notification);
+    send(NOTIFICATION_RECEIVED, notification);
   };
 }
