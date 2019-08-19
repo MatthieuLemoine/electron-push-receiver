@@ -68,6 +68,9 @@ function onNotification(webContents) {
     // Update persistentId
     config.set('persistentIds', [...persistentIds, persistentId]);
     // Notify the renderer process that a new notification has been received
-    webContents.send(NOTIFICATION_RECEIVED, notification);
+    // And check if window is not destroyed for darwin Apps
+    if(!webContents.isDestroyed()){
+      webContents.send(NOTIFICATION_RECEIVED, notification);
+    }
   };
 }
