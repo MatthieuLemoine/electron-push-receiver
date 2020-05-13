@@ -47,6 +47,22 @@ ipcRenderer.on(ON_NOTIFICATION_RECEIVED, (_, notification) => // display notific
 ipcRenderer.send(START_NOTIFICATION_SERVICE, senderId);
 ```
 
+## Resetting the Push Receiver
+
+There are cases where you may need to reset the push receiver to a state where it retrieves a new notification token from FCM. For instance, if your app is designed to support a sign-in screen and you only want push notifications for the person who signs in, you will need to have the push receiver delete the notification token when a different person signs in, otherwise the new sign-in may receive notifications that are only private to the person who signed in previously.
+
+- In renderer process :
+
+```javascript
+import { ipcRenderer } from 'electron';
+import {
+  DESTROY_NOTIFICATION_SERVICE
+} from 'electron-push-receiver/src/constants';
+
+// You can invoke it on user logout
+ipcRenderer.send(DESTROY_NOTIFICATION_SERVICE);
+```
+
 ## Example
 
 Thanks to [CydeSwype](https://github.com/CydeSwype), you can find an example project [here](https://github.com/CydeSwype/electron-fcm-demo).
