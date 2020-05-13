@@ -1,6 +1,8 @@
 module.exports = {
   // Event to be sent from renderer process to trigger service start
   START_NOTIFICATION_SERVICE: 'PUSH_RECEIVER:::START_NOTIFICATION_SERVICE',
+  // Event to be sent from renderer process to trigger service destroy
+  DESTROY_NOTIFICATION_SERVICE: 'PUSH_RECEIVER:::DESTROY_NOTIFICATION_SERVICE',
   // Event sent to the renderer process once the service is up
   NOTIFICATION_SERVICE_STARTED: 'PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED',
   // Event sent to the renderer process if an error has occured during the starting process

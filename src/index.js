@@ -3,6 +3,7 @@ const { ipcMain } = require('electron');
 const Config = require('electron-config');
 const {
   START_NOTIFICATION_SERVICE,
+  DESTROY_NOTIFICATION_SERVICE,
   NOTIFICATION_SERVICE_STARTED,
   NOTIFICATION_SERVICE_ERROR,
   NOTIFICATION_RECEIVED,
@@ -13,6 +14,7 @@ const config = new Config();
 
 module.exports = {
   START_NOTIFICATION_SERVICE,
+  DESTROY_NOTIFICATION_SERVICE,
   NOTIFICATION_SERVICE_STARTED,
   NOTIFICATION_SERVICE_ERROR,
   NOTIFICATION_RECEIVED,
@@ -23,6 +25,8 @@ module.exports = {
 // To be sure that start is called only once
 let started = false;
 
+//  used as a ref to client instance
+let client;
 // To be call from the main process
 function setup(webContents) {
   // Will be called by the renderer process
@@ -50,7 +54,10 @@ function setup(webContents) {
         webContents.send(TOKEN_UPDATED, credentials.fcm.token);
       }
       // Listen for GCM/FCM notifications
-      await listen(Object.assign({}, credentials, { persistentIds }), onNotification(webContents));
+      client = await listen(
+        Object.assign({}, credentials, { persistentIds }),
+        onNotification(webContents),
+      );
       // Notify the renderer process that we are listening for notifications
       webContents.send(NOTIFICATION_SERVICE_STARTED, credentials.fcm.token);
     } catch (e) {
@@ -58,6 +65,18 @@ function setup(webContents) {
       // Forward error to the renderer process
       webContents.send(NOTIFICATION_SERVICE_ERROR, e.message);
     }
+  });
+
+  ipcMain.on(DESTROY_NOTIFICATION_SERVICE, () => {
+    // destroy push notifications service
+    if (client !== undefined) {
+      client.destroy();
+    }
+    // clear cache
+    config.set('credentials', null);
+    config.set('senderId', null);
+    config.set('persistentIds', null);
+    started = false;
   });
 }
 
