@@ -33,7 +33,7 @@ function setup(webContents) {
     // Retrieve saved senderId
     const savedSenderId = config.get('senderId');
     if (started) {
-      webContents.send(NOTIFICATION_SERVICE_STARTED, (credentials.fcm || {}).token);
+      webContents.send(NOTIFICATION_SERVICE_STARTED, ((credentials && credentials.fcm) || {}).token);
       return;
     }
     started = true;
